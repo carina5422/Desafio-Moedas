@@ -48,6 +48,8 @@ cv2.imshow("Output", masked)
 # Esperando o usuário apertar qualquer tecla para fechar a janela da imagem
 cv2.waitKey(0)
 
+--> é preciso fazer neste codigo a diminuição das moedas para o proximo codigo exemplo de codigo cv2.houghcircles e contrario de dilate (deve tar nos pps)
+
 
 #CODIGO 2 - CONTORNO DA IMAGEM --> O OBJETIVO É JA COM AS MOEDAS DIMINUIDAS FAZER O CONTORNO DELAS PORQUE COMO ESTÃO PEQUENAS ESTÃO SEPARADAS E NAO CONTA ERROS
 import cv2
@@ -76,4 +78,6 @@ plt.imshow(rgb)
 
 print('Coins in the image: ', len(cnt))
 plt.show()
+
+--> depois do contorno deve dar o numero certo de moedas e dps fazer o resto das coisas que se pede, erros quadratico, estimativas etc. 
 
