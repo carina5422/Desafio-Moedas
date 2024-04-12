@@ -1,0 +1,422 @@
+# Definição de um baseline usando ferramentas já existentes
+
+# Text blob
+
+pip install TextBlob
+
+
+from textblob import TextBlob
+import pandas as pd
+import nltk
+
+1. Classificação inicial dos dados de teste usando uma ferramenta de análise de sentimentos já existente com modelos pré-treinados. Para isso, deve procurar e escolher uma ferramenta
+que permita fazer Análise de Sentimento diretamente a um texto. Uma possível ferramenta é a biblioteca TextBlob que se encontra ilustrada nos exemplos da aula, mas poderá usar outra tal como
+Vader Sentiment 1, spacy ou Stanza2
+
+
+Aplicar duas estratégias básicas para atribuir o sentimento a um texto.
+
+--> Aplicar uma ferramenta já treinada
+--> aplicar um léxico de sentimento
+
+# Aplicação de uma ferramenta pré-treinada (dados teste)
+
+import pandas as pd
+from textblob import TextBlob
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+# Process each row in the data
+certos = 0
+errados = 0
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Create a TextBlob object for the text
+    polaridade = TextBlob(text).sentiment.polarity
+    
+    # Print the sentiment polarity and the actual tag
+    print(f"  => {polaridade:4}, {row['class']}, {text}")
+    
+    # Calculate the accuracy
+    if (polaridade >= 0 and row['class'] == 'pos') or (polaridade < 0 and row['class'] == 'neg'):
+        certos += 1
+    else:
+        errados += 1
+
+# Calculate and print the accuracy
+acc = certos / (certos + errados)
+print(f"certos: {certos}, errados: {errados}, accuracy: {acc}")
+
+pip install prettytable
+
+import pandas as pd
+from textblob import TextBlob
+import prettytable as pt
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+certos = 0
+errados = 0
+
+# Create a table object
+my_table = pt.PrettyTable(["Polarity", "Tag", "Text"])
+
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Create a TextBlob object for the text
+    polarity = TextBlob(text).sentiment.polarity
+    
+    # Print the sentiment polarity and the actual tag
+    my_table.add_row([polarity, row['class'], text])
+    
+    # Calculate the accuracy
+    if (polarity >= 0 and row['class'] == 'pos') or (polarity < 0 and row['class'] == 'neg'):
+        certos += 1
+    else:
+        errados += 1
+
+# Calculate and print the accuracy
+acc=(certos)/(certos+errados)
+print(f"certos: {certos}, errados: {errados}, accuracy: {acc}")
+
+# Display the table
+print(my_table)
+
+# Outras métricas (não só accuracy) para oTextBlob
+
+import pandas as pd
+from textblob import TextBlob
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+# Initialize variables for counting correct and incorrect predictions
+y_true = []
+y_pred = []
+
+# Iterate over each row in the DataFrame
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Create a TextBlob object for the text
+    polarity = TextBlob(text).sentiment.polarity
+    
+    # Calculate the predicted sentiment label
+    if polarity >= 0:
+        y_pred.append('pos')
+    else:
+        y_pred.append('neg')
+    
+    # Calculate the true sentiment label
+    y_true.append(row['class'])
+
+# Calculate the evaluation metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, pos_label='pos', average='binary')
+recall = recall_score(y_true, y_pred, pos_label='pos', average='binary')
+f1 = f1_score(y_true, y_pred, pos_label='pos', average='binary')
+
+# Print the results
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1-score: {f1}")
+
+# Outras ferramentas para ver a obter melhor accuracy, vader_lexicon, spacy, e Stanza
+
+#vader_lexicon
+
+import pandas as pd
+from textblob import TextBlob
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import nltk
+nltk.download('vader_lexicon')
+
+# Initialize the sentiment analyzer
+sentiment_analyzer = SentimentIntensityAnalyzer()
+
+# Iterate over each row in the DataFrame
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Calculate the sentiment score using Vader
+    sentiment_score = sentiment_analyzer.polarity_scores(text)
+    
+    # Calculate the predicted sentiment label
+    if sentiment_score['compound'] >= 0.05:
+        y_pred.append('pos')
+    else:
+        y_pred.append('neg')
+    
+    # Calculate the true sentiment label
+    y_true.append(row['class'])
+
+# Calculate the evaluation metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, pos_label='pos', average='binary')
+recall = recall_score(y_true, y_pred, pos_label='pos', average='binary')
+f1 = f1_score(y_true, y_pred, pos_label='pos', average='binary')
+
+# Print the results
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1-score: {f1}")
+
+pip install spacy
+
+#spacy
+
+!python -m spacy download en_core_web_sm
+
+import pandas as pd
+import spacy
+import en_core_web_sm
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Load the spaCy model
+nlp = en_core_web_sm.load()
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+# Initialize variables for counting correct and incorrect predictions
+y_true = []
+y_pred = []
+
+# Iterate over each row in the DataFrame
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Create a spaCy document for the text
+    doc = nlp(text)
+    
+    # Check if the spaCy model has sentiment analysis capabilities
+    if doc.lang == "en" and doc.has_annotation("LEMMA") and doc.has_annotation("POLARITY"):
+        # Calculate the sentiment score using spaCy
+        sentiment_score = doc.sentiment.polarity
+    else:
+        # If the spaCy model doesn't have sentiment analysis capabilities,
+        # set the sentiment score to 0
+        sentiment_score = 0
+    
+    # Calculate the predicted sentiment label
+    if sentiment_score >= 0.05:
+        y_pred.append('pos')
+    else:
+        y_pred.append('neg')
+    
+    # Calculate the true sentiment label
+    y_true.append(row['class'])
+
+# Calculate the evaluation metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, pos_label='pos', average='binary')
+recall = recall_score(y_true, y_pred, pos_label='pos', average='binary')
+f1 = f1_score(y_true, y_pred, pos_label='pos', average='binary')
+
+# Print the results
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1-score: {f1}")
+
+#Stanza
+
+!pip install stanza
+
+
+import pandas as pd
+import stanza
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Load the data from the CSV file
+data = pd.read_csv('test.csv')
+
+# Initialize variables for counting correct and incorrect predictions
+y_true = []
+y_pred = []
+
+# Load the Stanza NLP model
+stanza_nlp = stanza.Pipeline('en')
+
+# Iterate over each row in the DataFrame
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + str(row['text'])
+    
+    # Create a Stanza document for the text
+    doc = stanza_nlp(text)
+    
+    # Calculate the sentiment score using Stanza
+    sentiment_score = doc.sentiment.polarity
+    
+    # Calculate the predicted sentiment label
+    if sentiment_score >= 0:
+        y_pred.append('pos')
+    else:
+        y_pred.append('neg')
+    
+    # Calculate the true sentiment label
+    y_true.append(row['class'])
+
+# Calculate the evaluation metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred, pos_label='pos', average='binary')
+recall = recall_score(y_true, y_pred, pos_label='pos', average='binary')
+f1 = f1_score(y_true, y_pred, pos_label='pos', average='binary')
+
+# Print the results
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1-score: {f1}")
+
+# Aplicação de uma ferramenta pré-treinada (dados treino)
+
+
+import pandas as pd
+from textblob import TextBlob
+
+# Read the CSV file
+data = pd.read_csv('train.csv', error_bad_lines=False)
+
+# Initialize variables for counting correct and incorrect predictions
+certos = 0
+errados = 0
+
+# Iterate over each row in the DataFrame
+for index, row in data.iterrows():
+    # Combine the tweet and text columns
+    text = str(row['tweet']) + ' ' + row['text']
+    
+    # Create a TextBlob object for the text
+    polarity = TextBlob(text).sentiment.polarity
+    
+    # Calculate the accuracy
+    if (polarity >= 0 and row['class'] == 'pos') or (polarity < 0 and row['class'] == 'neg'):
+        certos += 1
+    else:
+        errados += 1
+
+# Calculate the accuracy as the ratio of correct predictions to total predictions
+acc = certos / (certos + errados)
+
+# Print the results
+print(f"certos: {certos}, errados: {errados}, accuracy: {acc}")
+
+
+
+# 1º Pre-processar os dados de entrada (tweets) para remover quaisquer caracteres indesejáveis, normalizar a escrita e converter os tweets em uma forma que possa ser comparada com o léxico.
+# 2º Aplicar o léxico aos dados pre-processados para calcular a polaridade do sentimento
+
+Pre-processing the data before performing sentiment analysis can improve the accuracy of the results. Pre-processing can help to remove noise and inconsistencies in the data, making it easier to compare with the sentiment lexicon. Here are some examples of pre-processing techniques:
+
+--> Lowercasing: converting all the text to lowercase to ensure that the same words in different cases are treated as the same. <br>
+--> Tokenization: splitting the text into individual words or tokens to facilitate analysis.<br>
+--> Stopword removal: removing common words such as "the", "a", "and" that do not carry significant sentiment. <br>
+--> Stemming/Lemmatization: reducing words to their base or root form to reduce the vocabulary size and improve matching with the sentiment lexicon.<br>
+
+# Tokenização 
+
+import pandas as pd
+from nltk.tokenize import TweetTokenizer
+import sys
+import gzip
+import numpy as np
+import glob
+import collections
+import operator
+
+import pandas as pd
+
+# Read the CSV file, ignoring bad lines
+df = pd.read_csv("test.csv", error_bad_lines=False)
+
+# Print the first 5 rows of the DataFrame
+print(df.head(10))
+
+import pandas as pd
+from nltk.tokenize import TweetTokenizer
+
+# Read the CSV file
+df = pd.read_csv("test.csv", error_bad_lines=False)
+
+from nltk.tokenize import TweetTokenizer
+
+# Initialize the TweetTokenizer
+mytkzr = TweetTokenizer()
+
+# Tokenize a tweet
+tweet = "This is a cooool #dummysmiley: :-) :-P <3 and some arrows < > -> <--"
+tokens = mytkzr.tokenize(tweet)
+
+# Print the tokens
+print(tokens)
+
+import pandas as pd
+from nltk.tokenize import TweetTokenizer
+
+# Read the CSV file
+df = pd.read_csv("test.csv", error_bad_lines=False, names=['tweet', 'text', 'class'])
+
+# Initialize the TweetTokenizer
+mytkzr = TweetTokenizer()
+
+# Define a function to tokenize a tweet
+def tokenize_tweet(tweet):
+    if isinstance(tweet, str):
+        tokens = mytkzr.tokenize(tweet)
+    else:
+        tokens = mytkzr.tokenize(str(tweet))
+    return tokens
+
+# Apply the function to the "text" column
+df['tokenized_text'] = df['text'].apply(tokenize_tweet)
+
+# Print at least 10 tokenized tweets
+for i, row in df.head(150).iterrows():
+    print(row['tokenized_text'])
+
+import pandas as pd
+from nltk.tokenize import TweetTokenizer
+from IPython.display import display
+
+# Read the CSV file
+df = pd.read_csv("test.csv", error_bad_lines=False, names=['tweet', 'text', 'class'])
+
+# Initialize the TweetTokenizer
+mytkzr = TweetTokenizer()
+
+# Define a function to tokenize a tweet
+def tokenize_tweet(tweet):
+    if isinstance(tweet, str):
+        tokens = mytkzr.tokenize(tweet)
+    else:
+        tokens = mytkzr.tokenize(str(tweet))
+    return tokens
+
+# Apply the function to the "text" column
+df['tokenized_text'] = df['text'].apply(tokenize_tweet)
+
+# Display the first 10 rows of the tokenized DataFrame
+display(df.head(10))
+
+
+
+# Aplicação de um léxico de sentimento
