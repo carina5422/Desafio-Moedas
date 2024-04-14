@@ -510,3 +510,62 @@ print(confusion_matrix(y, y_pred))
 
 
 # Aplicação de um léxico de sentimento
+pip install pd
+
+import pandas as pd
+
+#data = pd.read_csv("../data/en/NCR-lexicon.csv", encoding="utf-8")
+data = pd.read_csv("C:/NRC-lexicon.csv", encoding="utf-8")
+data.sample(10)
+
+#por ordem crescente a identificação
+import pandas as pd
+
+data = pd.read_csv("C:/NRC-lexicon.csv", encoding="utf-8")
+data.sort_values(by="English", inplace=True, ascending=True)
+data.head()
+
+Aplicar o léxico para texto, neste caso dos tweets
+import pandas as pd
+
+# Load the NRC lexicon
+lex2 = pd.read_csv("C:/NRC-lexicon.csv", encoding="utf-8")
+lex2 = lex2.set_index('English')
+
+# Define the sentiment function
+def sentimento(text):
+    if pd.isna(text):
+        return None
+    soma = 0
+    for w in text.split():
+        if w in lex2.index:
+            soma = soma + lex2.loc[w, 'Positive'] - lex2.loc[w, 'Negative']
+    if soma > 0:
+        return "POS"
+    else:
+        return "NEG"
+
+# Load the "test.csv" file
+data = pd.read_csv("test.csv", encoding="utf-8")
+
+# Apply the sentiment function to the "text" column and store the result in a new column
+data['sentiment'] = data['text'].apply(sentimento).fillna('None')
+
+# Sort the DataFrame by the "text" column in ascending order
+data.sort_values(by="text", inplace=True, ascending=True)
+
+# Define a function to format the sentiment column
+def sentiment_formatter(x):
+    if x == "POS":
+        return 'background-color: green'
+    elif x == "NEG":
+        return 'background-color: red'
+
+
+# Apply the formatter to the sentiment column
+styled_data = data.style.applymap(sentiment_formatter, subset=['sentiment'])
+
+# Display the styled DataFrame
+styled_data
+
+--> falta acrescentar accuracy ig
